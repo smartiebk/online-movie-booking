@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN'
+        'http://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+
+<mapper namespace="com.ombp.cloud.app.hm.dao.impl.TheatreDaoImpl">
+	
+	<resultMap type="Theatre" id="TheatreRM">
+		<id property="id" column="id"/>
+		<result property="theatreName" column="theatreName"/>
+		<result property="addressId" column="addressId"/>
+		<association property="address" javaType="Address">
+			<id property="id" column="adId"/>
+			<result property="addressLines" column="addressLines"/>
+			<result property="area" column="area"/>
+			<result property="landmark" column="landmark"/>
+			<result property="pincode" column="pincode"/>
+			<result property="cityId" column="cityId"/>
+			<result property="primaryPhone" column="primaryPhone"/>
+			<result property="secondaryPhone" column="secondaryPhone"/>
+			<result property="alternatePhone" column="alternatePhone"/>
+			<result property="emailAddressCS" column="emailAddressCS"/>
+			<association property="city" javaType="City">
+				<id property="id" column="ciId"/>
+				<result property="cityName" column="cityName"/>
+				<result property="stateName" column="stateName"/>
+				<result property="country" column="country"/>
+			</association>
+		</association>
+		<collection property="movieShows" javaType="list" ofType="MovieShow">
+				<id property="id" column="msid"/>
+				<result property="movieId" column="movieId"/>
+				<result property="screenId" column="screenId"/>
+				<result property="showTimingFrom" column="showTimingFrom"/>
+				<result property="showTimingTo" column="showTimingTo"/>
+				<result property="showStartDate" column="showStartDate"/>
+				<result property="showEndDate" column="showEndDate"/>
+				<result property="showDate" column="showDate"/>
+				<association property="movie" javaType="Movie">
+					<id property="id" column="mvId"/>
+					<result property="movieName" column="movieName"/>
+					<result property="releaseDate" column="releaseDate"/>
+				</association>
+				<association property="screen" javaType="Screen">
+					<id property="id" column="scrId"/>
+					<result property="screenName" column="screenName"/>
+					<result property="theatreId" column="theatreId"/>
+				</association>
+			</collection> 
+	</resultMap>
+	
+	
+	<select id="fetchAllTheatreBySearchCriteria" parameterType="SearchCriteria" resultMap="TheatreRM">
+				SELECT 			th.theatre_id id, 
+								th.theatre_name theatreName, 
+								th.address_id addressId,
+								ad.address_id adId, 
+								ad.address_lines addressLines, 
+								ad.area area, 
+								ad.landmark landmark, 
+								ad.pincode pincode, 
+								ad.city_id cityId, 
+								ad.primary_phone primaryPhone, 
+								ad.secondary_phone secondaryPhone, 
+								ad.alternate_phone alternatePhone, 
+								ad.email_address_cs emailAddressCS,
+								city.city_id ciId, 
+								city.city_name cityName, 
+								city.state_name stateName, 
+								city.country_name country,
+								ms.movie_show_id msid, 
+								ms.movie_id movieId, 
+								ms.screen_id screenId, 
+								ms.show_timing_from showTimingFrom, 
+								ms.show_timing_to showTimingTo, 
+								ms.show_start_date showStartDate, 
+								ms.show_end_date showEndDate, 
+								ms.show_date showDate,
+								scr.screen_id scrId, 
+								scr.screen_name screenName, 
+								scr.theatre_id theatreId, 
+								mv.movie_id mvId, 
+								mv.movie_name movieName, 
+								mv.release_date releaseDate
+				FROM 			theatre th
+				LEFT JOIN		address ad
+				ON				ad.address_id = th.address_id AND ad.is_deleted=0
+				LEFT JOIN       city city
+				ON              city.city_id = ad.city_id AND city.is_deleted=0
+				INNER JOIN 		screen scr 
+				ON 				scr.theatre_id = th.theatre_id AND scr.is_deleted=0
+				INNER JOIN 		movie_show ms
+				ON 				ms.screen_id = scr.screen_id AND scr.is_deleted=0
+				INNER JOIN      movie mv
+				ON				mv.movie_id = ms.movie_id and mv.is_deleted=0
+				WHERE			th.is_deleted=0
+				AND             mv.movie_name=#{movieName}
+				<if test="showStartTiming!=null">
+					AND				ms.show_timing_from = #{showStartTiming}
+				</if>
+				<if test="showDate!=null">
+					AND				ms.show_date = #{showDate}
+				</if>
+				<if test="city!=null">
+					AND				LOWER(city.city_name) = LOWER('${city}')
+				</if>
+	</select>
+	
+</mapper>

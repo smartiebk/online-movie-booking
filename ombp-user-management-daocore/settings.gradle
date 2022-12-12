@@ -1,0 +1,7 @@
+rootProject.name = 'ombp-user-management-daocore'
+include ':ombp-common-models'
+project(':ombp-common-models').projectDir = new File(settingsDir, '../ombp-common-models')
+include ':ombp-user-management-servcore'
+project(':ombp-user-management-servcore').projectDir = new File(settingsDir, '../ombp-user-management-servcore')
+include ':ombp-common-daocore'
+project(':ombp-common-daocore').projectDir = new File(settingsDir, '../ombp-common-daocore')

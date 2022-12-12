@@ -1,0 +1,106 @@
+{
+	"variables": [],
+	"info": {
+		"name": "OMBP",
+		"_postman_id": "73958148-8d94-24f1-70cd-992fa46a0976",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Save Movie Show",
+			"request": {
+				"url": "",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Sample",
+			"request": {
+				"url": "http://localhost:4000/oa/json/getsample",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Save Movie Show",
+			"request": {
+				"url": "http://localhost:4000/oa/movieshow/save",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": null,\r\n    \"movie\": {\r\n        \"id\": 1,\r\n        \"movieName\": \"Pushpa\"\r\n    },\r\n    \"movieId\": 1,\r\n    \"screenId\": 1,\r\n    \"showTimingFrom\": \"2022-01-24T04:28:56.245+0000\",\r\n    \"showTimingTo\": \"2022-01-24T04:28:56.245+0000\",\r\n    \"showStartDate\": \"2022-01-10T04:28:56.245+0000\",\r\n    \"showEndDate\": \"2022-01-30T04:28:56.245+0000\"\r\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get Movie by movie Name",
+			"request": {
+				"url": "http://localhost:4000/oa/fetch/movie/pushpa",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get all screens by theatre ID",
+			"request": {
+				"url": "http://localhost:4000/oa/fetch/theatre/screens/1",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "List all movie shows",
+			"request": {
+				"url": "http://localhost:4000/oa/fetch/theatre/shows/1",
+				"method": "GET",
+				"header": [],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Browse all theatres",
+			"request": {
+				"url": "http://localhost:8082/ombp-ui/oa/search/theatre",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"movieName\" : \"Pushpa\",\n\t\"city\" : \"Nagpur\",\n\t\"showStartTiming\" : \"2022-01-24T12:00:00.245+0000\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}

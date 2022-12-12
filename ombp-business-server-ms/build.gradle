@@ -1,0 +1,104 @@
+plugins {
+	id 'org.springframework.boot' version '2.2.6.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+	id 'eclipse'
+	id 'application'
+}
+
+group = 'com.ombp.cloud'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+ext {
+	set('springCloudVersion', "Hoxton.SR3")
+}
+
+ext.buildFor = project.hasProperty("buildFor") ? project.getProperty("buildFor") : ""
+def envNames = ["dev", "qa", "uat", "prod"]
+
+dependencies {
+	compile project(':ombp-common-models')
+	compile project(':ombp-common-daocore')
+	compile project(':ombp-user-management-daocore')
+	compile project(':ombp-user-management-servcore')
+
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.2'
+	compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2', version: '2.3.3.RELEASE'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+	
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'net.sf.ehcache:ehcache'
+	implementation 'javax.cache:cache-api:1.1.0'
+	
+	/*implementation 'org.springframework.cloud:spring-cloud-starter-oauth2'*/
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+	runtimeOnly 'mysql:mysql-connector-java'
+	runtimeOnly 'org.hsqldb:hsqldb'
+	implementation 'org.postgresql:postgresql'
+	testImplementation('org.springframework.boot:spring-boot-starter-test') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'ombp-business-server-ms',
+                'Implementation-Version': version
+    }
+	
+	if(!buildFor.isEmpty())
+		{
+			for(int i =0; i <envNames.size(); i++)
+			{
+				String envName = envNames.get(i);
+				if(!envName.equalsIgnoreCase(buildFor))
+				{
+					exclude('application-'+envName+'.properties')
+				}
+			}
+		}
+}
+
+distZip{
+	
+	if(!buildFor.isEmpty())
+		{
+			for(int i =0; i <envNames.size(); i++)
+			{
+				String envName = envNames.get(i);
+				if(!envName.equalsIgnoreCase(buildFor))
+				{
+					exclude('application-'+envName+'.properties')
+				}
+			}
+		}
+}
+
+jar {
+    enabled = true
+}
+bootJar {
+    classifier = 'boot'
+}
+
+mainClassName = 'com.ombp.cloud.app.BusinessServerApplication'
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+test {
+	useJUnitPlatform()
+}

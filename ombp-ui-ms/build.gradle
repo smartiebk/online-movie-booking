@@ -1,0 +1,113 @@
+
+plugins {
+	id 'org.springframework.boot' version '2.2.6.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+	id 'application'
+	id 'eclipse'
+}
+
+group = 'com.ombp.ui'
+version = '1.1.0-RELEASE'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+
+ext {
+	set('springCloudVersion', "Hoxton.SR3")
+}
+
+ext.buildFor = project.hasProperty("buildFor") ? project.getProperty("buildFor") : ""
+def envNames = ["dev", "qa", "uat", "prod"]
+
+dependencies {
+	compile project(':ombp-common-models')
+	
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.2'
+	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+	compile group: 'org.springframework.boot', name: 'spring-boot-starter-json', version: '2.3.4.RELEASE'
+	compile group: 'org.jsoup', name: 'jsoup', version: '1.13.1'
+	compile group: 'org.json', name: 'json', version: '20200518'
+	implementation group: 'javax.mail', name: 'mail', version: '1.4'
+	
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+	//implementation group: 'org.apache.pdfbox', name: 'pdfbox-tools', version: '2.0.22'
+	//implementation group: 'net.sf.cssbox', name: 'pdf2dom', version: '2.0.0'
+	
+	implementation group: 'com.openhtmltopdf', name: 'openhtmltopdf-pdfbox', version: '1.0.6'
+	
+	compile group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.11.920'
+	compile group: 'software.amazon.awssdk', name: 's3', version: '2.15.49'
+	compile group: 'javax.mail', name: 'mail', version: '1.4'
+	
+	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+	runtimeOnly 'mysql:mysql-connector-java'
+	runtimeOnly 'org.hsqldb:hsqldb'
+	implementation 'org.postgresql:postgresql'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	
+	implementation group: 'org.apache.poi', name: 'poi', version: '5.0.0'
+	implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.0.0'
+	implementation group: 'org.zeroturnaround', name: 'zt-zip', version: '1.14'
+	implementation group: 'net.sourceforge.htmlunit', name: 'htmlunit', version: '2.50.0'
+
+}
+
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'ombp-ui-ms',
+                'Implementation-Version': version
+    }
+	
+	if(!buildFor.isEmpty())
+		{
+			for(int i =0; i <envNames.size(); i++)
+			{
+				String envName = envNames.get(i);
+				if(!envName.equalsIgnoreCase(buildFor))
+				{
+					exclude('application-'+envName+'.properties')
+				}
+			}
+		}
+}
+
+distZip{
+	
+	if(!buildFor.isEmpty())
+		{
+			for(int i =0; i <envNames.size(); i++)
+			{
+				String envName = envNames.get(i);
+				if(!envName.equalsIgnoreCase(buildFor))
+				{
+					exclude('config/application-'+envName+'.properties')
+					exclude('uploads/templates_data/'+envName+'_loginlogo.jpg')
+					exclude('uploads/templates_data/'+envName+'_header.jpg')
+				}
+			}
+		}
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	}
+}
+
+jar {
+    enabled = true
+}
+bootJar {
+    classifier = 'boot'
+}
+
+mainClassName = 'com.ombp.cloud.app.ui.UserInterfaceApplication'

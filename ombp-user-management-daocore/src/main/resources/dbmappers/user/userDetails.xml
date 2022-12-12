@@ -1,0 +1,386 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN'
+        'http://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+
+<mapper namespace="com.ombp.cloud.app.um.dao.impl.UserDaoImpl">
+	
+	<resultMap type="AppUser" id="AppUserResultMap">
+		<id property="id" column="id"/>
+		<result property="username" column="username"/>
+		<result property="email" column="email"/>
+		<result property="mobileNumber" column="mobileNumber"/>
+		<result property="password" column="password"/>
+		<result property="enabled" column="enabled"/>
+		<result property="accountExpired" column="accountExpired"/>
+		<result property="accountLocked" column="accountLocked"/>
+		<result property="credentialsExpired" column="credentialsExpired"/>
+		<result property="isDeleted" column="isDeleted"/>
+		<result property="isArchived" column="isArchived"/>
+		<association property="appUserDetails" javaType="AppUserDetails">
+		    <id property="id" column="did"/>
+		    <result property="firstName" column="first_name"/>
+		    <result property="lastName" column="last_name"/>
+		    <result property="fullNameOfUser" column="fullNameOfUser"/>
+		    <result property="appUserId" column="app_user_id"/>
+		    <result property="address" column="address"/>
+		    <result property="state" column="addr_state"/>
+		    <result property="altEmail" column="alt_email"/>
+		    <result property="altMobile" column="alt_mobile"/>
+		    <result property="city" column="city"/>
+		    <result property="imagePath" column="image_path"/>
+		    <result property="dateOfBirth" column="dob"/>
+		 </association>
+	</resultMap>
+	
+	
+	<select id="fetchUserByUsername" resultMap="AppUserResultMap" parameterType="String">
+			SELECT au.APP_USER_ID id,
+			       au.USERNAME username,
+			       au.EMAIL email,
+			       au.MOBILE_NUMBER mobileNumber,
+			       au.PASSWORD "password",
+			       au.ENABLED enabled,
+			       au.ACCOUNT_EXPIRED accountExpired,
+			       au.ACCOUNT_LOCKED accountLocked,
+			       au.CREDENTIALS_EXPIRED credentialsExpired,
+			       au.IS_DELETED isDeleted,
+			       au.IS_ARCHIVED isArchived,
+			       aud.first_name,
+				   aud.last_name,
+				   CONCAT(aud.first_name ,' ', aud.last_name) fullNameOfUser,
+				   aud.app_user_id,
+				   aud.app_user_details_id did,
+				   aud.address,
+				   aud.addr_state,
+				   aud.alt_email,
+				   aud.alt_mobile,
+				   aud.city,
+				   aud.image_path,
+				   aud.dob
+			FROM app_user au
+			LEFT JOIN app_user_details aud on aud.app_user_id=au.APP_USER_ID
+			AND aud.is_deleted=0 and aud.is_archived=0
+			WHERE au.is_Deleted=0
+			and au.username = #{username}
+	</select>
+	
+	<select id="loadUserAuthorities" resultType="Authority" parameterType="int">
+			select aa.action_name authority from app_action aa
+			inner join m_action_role mar on mar.app_action_id = aa.app_action_id
+			and mar.is_deleted=0
+			inner join M_USER_GROUP_ROLE mugr on mugr.app_role_id = mar.app_role_id
+			and mugr.is_deleted=0
+			inner join M_USER_GROUP_USER mugu on mugu.user_group_id = mugr.user_group_id
+			and mugu.is_deleted=0
+			inner join app_user au on au.app_user_id = mugu.app_user_id
+			and au.is_deleted=0
+			where au.app_user_id=#{currentUserId}
+	</select>
+	
+	<select id="fetchById" parameterType="map" resultMap="AppUserResultMap">
+			SELECT au.APP_USER_ID id,
+			       au.USERNAME username,
+			       au.EMAIL email,
+			       au.MOBILE_NUMBER mobileNumber,
+			       au.ENABLED enabled,
+			       au.ACCOUNT_EXPIRED accountExpired,
+			       au.ACCOUNT_LOCKED accountLocked,
+			       au.CREDENTIALS_EXPIRED credentialsExpired,
+			       au.IS_DELETED isDeleted,
+			       au.IS_ARCHIVED isArchived,
+			       aud.first_name,
+				   aud.last_name,
+				   CONCAT(aud.first_name ,' ', aud.last_name) fullNameOfUser,
+				   aud.app_user_id,
+				   aud.app_user_details_id did,
+				   aud.address,
+				   aud.addr_state,
+				   aud.alt_email,
+				   aud.alt_mobile,
+				   aud.city,
+				   aud.image_path,
+				   aud.dob
+			FROM app_user au
+			LEFT JOIN app_user_details aud on aud.app_user_id=au.APP_USER_ID
+			AND aud.is_deleted=0 and aud.is_archived=0
+			WHERE au.is_Deleted=0
+			and au.APP_USER_ID = #{id}
+			<if test="!isSuperAdmin">
+				and au.APP_USER_ID IN (
+				<include refid="permissionedUsers"></include>
+				)
+			</if>
+	</select>
+	
+	<select id="existsWithParameters" resultType="int" parameterType="map">
+		select count(app_user_id) from app_user where is_deleted=0 and is_archived=0
+			<if test="username!=null || mobile!=null || email!=null">
+			and 
+			(  1!=1 
+				<if test="username!=null">
+				  OR
+				  username = #{username}
+				</if>
+				<if test="mobile!=null">
+				OR 
+				mobile_number = #{mobile}
+				</if>
+				<if test="email!=null">
+				OR 
+				email = #{email}
+				</if>
+			)
+			</if>
+	</select>
+	
+	<insert id="insert" parameterType="AppUser" useGeneratedKeys="true" keyProperty="id" keyColumn="app_user_id">
+		INSERT INTO app_user
+		(
+			username, email, mobile_number, password, enabled, account_expired,
+			account_locked, credentials_expired, is_deleted, is_archived,
+			create_time, update_time, created_by_user_id
+		)
+		VALUES(#{username}, #{email}, #{mobileNumber}, #{password}, 0, 0, 0, 0, 0, 0, #{createTime}, #{updateTime}, #{userId});
+	</insert>
+	
+	<insert id="insertUserDetails" parameterType="AppUserDetails">
+		INSERT INTO app_user_details(
+				first_name, 
+				last_name, 
+				city, 
+				address, 
+				addr_state, 
+				alt_mobile, 
+				alt_email, 
+				image_path, 
+				dob, 
+				is_deleted, 
+				is_archived, 
+				create_time, 
+				update_time, 
+				app_user_id)
+		 VALUES 
+		 		(
+		 		#{firstName}, 
+		 		#{lastName}, 
+		 		#{city},  
+		 		#{address},  
+		 		#{state},  
+		 		#{altMobile},
+		 		#{altEmail},
+		 		#{imagePath}, 
+		 		#{dateOfBirth}, 
+		 		0,
+		 		0, 
+		 		NOW(), 
+		 		NOW(), 
+		 		#{appUserId}
+		 		);
+	
+	</insert>
+	
+	<update id="update" parameterType="AppUser">
+		UPDATE app_user
+			SET email=#{email}, mobile_number=#{mobileNumber}, update_time=#{updateTime}
+		WHERE app_user_id=#{id};
+	</update>
+	
+	
+	<select id="containsAnyUnAuthorizedEntityId" parameterType="map" resultType="int">
+		select count(app_user_id) from app_user where is_deleted = 0 and app_user_id IN 
+		<foreach item="item" index="index" collection="idsCollection"
+			separator="," open="(" close=")">
+			#{item}
+		</foreach>
+		<if test="!isSuperAdmin">
+			AND  app_user_id IN (
+			<include refid="permissionedUsers"></include>
+			)
+		</if>
+	</select>
+	
+	<select id="fetchWithPageSearchSort" resultType="AppUser" resultMap="AppUserResultMap" parameterType="map">
+		<include refid="searchUsers"></include>
+		<if test="pagingRequest!=null">
+			<include refid="com.ombp.cloud.app.common.dao.impl.GenericDaoImpl.orderBy"></include>
+			<include refid="com.ombp.cloud.app.common.dao.impl.GenericDaoImpl.pagination"></include>
+		</if>
+	</select>
+	
+	<select id="count" resultType="int" parameterType="map">
+		<include refid="com.ombp.cloud.app.common.dao.impl.GenericDaoImpl.countSql"></include>
+			<include refid="searchUsers"></include>
+		<include refid="com.ombp.cloud.app.common.dao.impl.GenericDaoImpl.datasetAlias"></include>
+	</select>
+	
+	<sql id="searchUsers">
+		SELECT au.APP_USER_ID id,
+			       au.USERNAME username,
+			       au.EMAIL email,
+			       au.MOBILE_NUMBER mobileNumber,
+			       au.ENABLED enabled,
+			       au.ACCOUNT_EXPIRED accountExpired,
+			       au.ACCOUNT_LOCKED accountLocked,
+			       au.CREDENTIALS_EXPIRED credentialsExpired,
+			       au.IS_DELETED isDeleted,
+			       au.IS_ARCHIVED isArchived,
+			       aud.first_name,
+				   aud.last_name,
+				   CONCAT(aud.first_name ,' ', aud.last_name) fullNameOfUser,
+				   aud.app_user_id,
+				   aud.app_user_details_id did,
+				   aud.address,
+				   aud.addr_state,
+				   aud.alt_email,
+				   aud.alt_mobile,
+				   aud.city,
+				   aud.image_path,
+				   aud.dob
+			FROM app_user au
+			LEFT JOIN app_user_details aud on aud.app_user_id=au.APP_USER_ID
+			AND aud.is_deleted=0 and aud.is_archived=0
+			WHERE au.is_Deleted=0
+		 <if test="!isSuperAdmin">
+			and au.APP_USER_ID IN (
+				<include refid="permissionedUsers"></include>
+			)
+		</if> 
+		<if test="pagingRequest!=null">
+			<if test="pagingRequest.search!=null">
+				<if test="pagingRequest.search.value!=null">
+				AND 
+				(
+					LOWER(aud.first_name) like LOWER('%${pagingRequest.search.value}%')
+					OR
+					LOWER(aud.last_name) like LOWER('%${pagingRequest.search.value}%')
+					OR
+					LOWER(au.USERNAME) like LOWER('%${pagingRequest.search.value}%')
+					OR
+					LOWER(au.EMAIL) like LOWER('%${pagingRequest.search.value}%')
+					OR
+					LOWER(au.MOBILE_NUMBER) like LOWER('%${pagingRequest.search.value}%')
+				)
+				</if>
+			</if>
+		</if>
+		<if test="excludeAlreadySharedIdsForEntity!=null">
+			and au.APP_USER_ID NOT IN (${excludeAlreadySharedIdsForEntity})
+		</if>
+	</sql>
+	
+	<sql id="permissionedUsers">
+		select au.app_user_id from app_user au
+		inner join m_user_group_user mugu on mugu.app_user_id = au.app_user_id and mugu.is_deleted=0
+		where au.is_deleted=0 and mugu.user_group_id in 
+		(
+			select user_group_id from m_user_group_user where is_deleted=0 and app_user_id=#{currentUserId}
+		)
+		UNION ALL
+		select app_user_id from app_user where created_by_user_id = #{currentUserId} and is_deleted=0
+	</sql>
+	
+	<update id="logicalDeleteSelected" parameterType="map">
+			UPDATE app_user SET is_deleted=2
+			WHERE app_user_id IN 
+			<foreach item="item" index="index" collection="selectedIds"
+			separator="," open="(" close=")">
+			#{item}
+		</foreach>;
+		UPDATE app_user_details SET is_deleted=2 where 
+		app_user_id IN 
+			<foreach item="item" index="index" collection="selectedIds"
+			separator="," open="(" close=")">
+			#{item}
+		</foreach>;
+	</update>
+	
+	<select id="getAllUserGroupsByUserId" resultType="UserGroup" parameterType="int">
+			select user_group_id id, "name", description from app_user_group where is_deleted=0
+			and user_group_id in (select user_group_id from m_user_group_user where app_user_id=#{realId} and is_deleted=0)
+	</select>
+	
+	<update id="removeUserGroupFromUser" parameterType="map">
+		update m_user_group_user set is_deleted=2 where app_user_id=#{userId} and user_group_id=#{userGroupId}
+	</update>
+	
+	<update id="updateUserDetails" parameterType="AppUserDetails">
+			UPDATE app_user_details
+			SET 	first_name=#{firstName}, 
+					last_name=#{lastName}, 
+					city=#{city}, 
+					address=#{address}, 
+					addr_state=#{state}, 
+					alt_mobile=#{altMobile}, 
+					alt_email=#{altEmail}, 
+					image_path=#{imagePath}, 
+					dob=#{dateOfBirth}, 
+					update_time=NOW()
+			WHERE app_user_details_id=#{id} and is_deleted=0
+	</update>
+	
+	<insert id="auditAppUserBeforePasswordChange" parameterType="int">
+		INSERT INTO app_user_audit	(
+			 							username, 
+			 							user_id, 
+			 							password_before_change, 
+			 							create_time, 
+			 							update_time
+			 						)
+			(	Select 					username,
+										app_user_id,
+										password,
+										NOW(),
+										NOW()
+				FROM    				app_user
+				WHERE   				app_user_id=#{id}	
+			)
+		
+	</insert>
+	
+	<update id="updateUserPassword" parameterType="AppUser">
+		UPDATE 		app_user
+		SET 		password= #{password}, 
+					update_time= NOW()
+		WHERE       app_user_id = #{id} 
+	</update>
+	
+	<update id="saveUserInfoFromProfile" parameterType="map">
+		update     app_user
+		SET		   update_time=now()
+				   <if test="email!=null">
+				   , email =#{email}
+				   </if>
+				   <if test="mobileNumber!=null">
+				   , mobile_number = #{mobileNumber}
+				   </if>
+		WHERE      app_user_id = #{currentUserId}		   
+		AND        is_deleted=0;
+		
+		UPDATE 		app_user_details
+		SET 		update_time=now()
+					<if test="firstName!=null">
+					, first_name=#{firstName}
+					</if> 
+					<if test="lastName!=null">
+					,last_name=#{lastName}
+					</if>
+					<if test="city!=null">
+					, city=#{city}
+					</if>
+					<if test="address!=null">
+					, address=#{address}
+					</if>
+					<if test="state!=null">
+					, addr_state=#{state} 
+					</if>
+					<if test="alternateMobileNumber!=null">
+					, alt_mobile=#{alternateMobileNumber}
+					</if> 
+					<if test="dob!=null">
+					, dob=#{dob} 
+					</if>
+		WHERE		app_user_id = #{currentUserId}
+		AND         is_deleted=0			
+	</update>
+	
+</mapper>

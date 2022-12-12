@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN'
+        'http://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+
+<mapper namespace="com.ombp.cloud.app.ac.dao.impl.AppComponentDaoImpl">
+	
+	<select id="fetchClientOrgPref" resultType="RealClientOrgPreference" parameterType="map">
+		SELECT real_client_org_pref_id id, 
+				real_client_org_identifier identifier, 
+				org_name_dblabel orgNameDBLabel, 
+				org_name_keylabel orgNameKeyLabel, 
+				details details, 
+				hover_title hoverTitle, 
+				url url, 
+				logo_pack_path logoPackPath
+			FROM real_client_org_pref
+			where is_deleted=0 and is_archived=0
+			and real_client_org_identifier= #{realOrgClientId}
+	</select>
+	
+</mapper>

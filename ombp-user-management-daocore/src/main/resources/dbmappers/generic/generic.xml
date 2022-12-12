@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN'
+        'http://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+
+<mapper namespace="com.ombp.cloud.app.common.dao.impl.GenericDaoImpl">
+
+	<sql id="pagination">
+		LIMIT ${pagingRequest.length} OFFSET ${pagingRequest.offset} 
+	</sql>
+	
+	<sql id="orderBy">
+		ORDER BY
+		<if test="pagingRequest.currentSortProperty!=null">
+			${pagingRequest.currentSortProperty} ${pagingRequest.currentSortOrder}		
+		</if>
+		<if test="pagingRequest.currentSortProperty==null">
+				id desc	
+		</if>
+	</sql>
+	
+	<sql id="datasetAlias">
+		) As fData
+	</sql>
+	
+	<sql id="countSql">
+		Select count (1) from (
+	</sql>
+	
+	<sql id="selectAll_PRE_STATEMENT">
+		SELECT * FROM (
+	</sql>
+	
+	<sql id="selectAll_POST_STATEMENT">
+		) AS tdata 
+	</sql>
+	
+	<sql id="permissionedActionsOfUser">
+			select distinct aa.app_action_id, aa.action_name from app_user au 
+			inner join m_user_group_user mugu on mugu.app_user_id = au.app_user_id and mugu.is_deleted=0
+			inner join m_user_group_role mugr on mugr.user_group_id= mugu.user_group_id and mugr.is_deleted=0
+			inner join m_action_role mar on mar.app_role_id= mugr.app_role_id and mar.is_deleted=0
+			inner join app_action aa on aa.app_action_id= mar.app_action_id and aa.is_deleted=0
+			where au.is_deleted=0 and au.app_user_id=#{currentUserId}
+	</sql>
+	
+</mapper>

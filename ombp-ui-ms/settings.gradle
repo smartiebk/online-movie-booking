@@ -1,0 +1,3 @@
+rootProject.name = 'ombp-ui-ms'
+include ':ombp-common-models'
+project(':ombp-common-models').projectDir = new File(settingsDir, '../ombp-common-models')

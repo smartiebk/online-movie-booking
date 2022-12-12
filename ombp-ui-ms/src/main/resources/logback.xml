@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+	<property name="LOG_FILE"
+		value="../log/ombp-ui-web-site.log" />
+	<property name="FILE_LOG_PATTERN"
+		value="%d{dd-MM-yyyy HH:mm:ss.SSS} | %-5level | %logger{16} | %m%n%rEx" />
+
+	 <statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG_FILE}</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.FixedWindowRollingPolicy">
+			<fileNamePattern>${LOG_FILE}.%i</fileNamePattern>
+			<minIndex>1</minIndex>
+			<maxIndex>20</maxIndex>
+		</rollingPolicy>
+		<triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+			<MaxFileSize>1MB</MaxFileSize>
+		</triggeringPolicy>
+		<encoder>
+			<pattern>${FILE_LOG_PATTERN}</pattern>
+		</encoder>
+	</appender>
+
+
+	<logger name="org.springframework" level="ALL" additivity="false" />
+
+	<logger name="org.thymeleaf" level="DEBUG" additivity="false" />
+
+	<logger name="org.mybatis.spring" level="DEBUG" additivity="false" />
+
+	<logger name="java.sql" level="DEBUG" additivity="false" />
+
+	<logger name="com.ombp.cloud.app.ui" level="DEBUG" additivity="false">
+		<appender-ref ref="FILE" />
+	</logger>
+
+	<root level="DEBUG">
+		<appender-ref ref="FILE" />
+	</root>
+
+</configuration>

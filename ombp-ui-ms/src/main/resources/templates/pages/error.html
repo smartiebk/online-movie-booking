@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<head th:replace="~{pages/common/head :: head}"></head>
+
+<body id="page-top">
+	<div id="wrapper">
+		<div id="content-wrapper" class="d-flex flex-column">
+			<div id="content">
+				<div class="container-fluid">
+					<br><br><br><br><br><br>
+					<div class="text-center">
+						<div class="error mx-auto" th:data-text="#{error.expression}"
+							th:text="#{error.expression}"></div>
+						<p class="lead text-gray-800 mb-5"
+							th:text="#{error.expression.msg}"></p>
+						<br>
+						<br>
+						<p class="text-gray-500 mb-0"
+							th:text="#{error.expression.details}"></p>
+						<a href="/app"> &larr; <span
+							th:text="#{error.backto.dashboard}"></span></a>
+					</div>
+					<br><br><br>
+				</div>
+			</div>
+			<div th:insert="~{pages/common/footer :: footerFrag}"></div>
+		</div>
+	</div>
+	<div th:insert="~{pages/common/backtotop :: backtotop}"></div>
+	<div th:insert="~{pages/common/scripts :: scripts}"></div>
+</body>
+</html>

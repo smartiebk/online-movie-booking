@@ -1,0 +1,62 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN'
+        'http://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+
+<mapper namespace="com.ombp.cloud.app.hm.dao.impl.AlertEventLogDaoImpl">
+	
+	
+	<insert id="insert" parameterType="SMSLog" useGeneratedKeys="true" keyProperty="id" keyColumn="sms_log_id">
+			INSERT INTO 	sms_log
+							(
+								sent_to, 
+								sms, 
+								sms_type, 
+								api_url, 
+								status, 
+								create_time, 
+								update_time
+							)
+				VALUES 		(
+								#{sentTo}, 
+								#{sms}, 
+								#{smsType}, 
+								#{apiUrl}, 
+								#{status}, 
+								NOW(), 
+								NOW()
+							)
+	</insert>
+	
+	<insert id="insertEmailLog" parameterType="EmailLog" useGeneratedKeys="true" keyProperty="id" keyColumn="email_log_id">
+			INSERT INTO 	email_log
+							(
+								sent_to, 
+								sent_cc, 
+								sent_bcc, 
+								email_subject, 
+								email_content, 
+								email_type, 
+								email_from, 
+								is_attachment_present, 
+								attachment_file_names, 
+								status, 
+								create_time, 
+								update_time
+							)
+			VALUES 			(
+								#{sentTo}, 
+								#{sentCc}, 
+								#{sentBcc}, 
+								#{emailSubject}, 
+								#{emailContent}, 
+								#{emailType}, 
+								#{emailFrom}, 
+								#{isAttchmentPresent}, 
+								#{attachmentFileNames}, 
+								#{status}, 
+								NOW(), 
+								NOW()
+							)
+	</insert>
+	
+</mapper>

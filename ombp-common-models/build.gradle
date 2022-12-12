@@ -1,0 +1,15 @@
+plugins {
+	id 'java'
+	id 'java-library'
+	id 'eclipse'
+}
+
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+}
+
+dependencies {
+    
+}
+

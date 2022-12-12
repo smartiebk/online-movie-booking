@@ -1,0 +1,36 @@
+plugins {
+	//id 'org.springframework.boot' version '2.2.6.RELEASE'
+	//id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'java'
+	id 'java-library'
+	id 'eclipse'
+}
+
+group = 'com.ombp.cloud'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+repositories {
+	mavenCentral()
+}
+
+//bootJar.enabled = false
+jar.enabled = true
+
+dependencies {
+	compile project (':ombp-common-models')
+	
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:2.1.2'
+	compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+	
+	
+	//runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc'
+	//runtimeOnly 'mysql:mysql-connector-java'
+	//testImplementation('org.springframework.boot:spring-boot-starter-test') {
+	//	exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	//}
+}
+
+test {
+	useJUnitPlatform()
+}

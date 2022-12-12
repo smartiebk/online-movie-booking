@@ -1,0 +1,138 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE mapper PUBLIC '-//mybatis.org//DTD Mapper 3.0//EN'
+        'http://mybatis.org/dtd/mybatis-3-mapper.dtd'>
+
+<mapper namespace="com.ombp.cloud.app.hm.dao.impl.MovieShowDaoImpl">
+	
+	<insert id="insertMovieShow" parameterType="MovieShow" useGeneratedKeys="true" keyProperty="id" keyColumn="movie_show_id">
+			INSERT INTO 	movie_show
+							(
+								movie_id, 
+								screen_id, 
+								show_timing_from, 
+								show_timing_to, 
+								show_start_date, 
+								show_end_date, 
+								is_deleted, 
+								updated_by_user_id, 
+								create_time, 
+								update_time, 
+								show_date
+							)
+			VALUES 			(
+								#{movieId}, 
+								#{screenId}, 
+								#{showTimingFrom}, 
+								#{showTimingTo}, 
+								#{showStartDate}, 
+								#{showEndDate}, 
+								0, 
+								1, 
+								NOW(), 
+								NOW(), 
+								#{showDate}
+							)
+	</insert>
+	
+	<update id="updateMovieShow" parameterType="MovieShow">
+		UPDATE 	movie_show
+		SET 	
+				<if test="movieId!=null">
+					movie_id= #{movieId},
+				</if>
+				<if test="screenId!=null">
+					screen_id=#{screenId},
+				</if>
+				<if test="showTimingFrom!=null">
+					show_timing_from=#{showTimingFrom},
+				</if>
+				<if test="showTimingTo!=null">
+					show_timing_to=#{showTimingTo},
+				</if> 
+				<if test="showStartDate!=null">
+					show_start_date=#{showStartDate}, 
+				</if> 
+				<if test="showEndDate!=null">
+					show_end_date=#{showEndDate}, 
+				</if> 
+				<if test="showDate!=null">
+					show_date=#{showDate}, 
+				</if> 
+				update_time=NOW()
+		WHERE 	movie_show_id = #{id}
+		AND     is_deleted=0
+	</update>
+	
+	<select id="fetchMovieByMovieName" parameterType="String" resultType="Movie">
+		SELECT 		movie_id id, 
+					movie_name movieName, 
+					release_date releaseDate
+		FROM 		movie
+		WHERE       lower(movie_name) = lower('${movieName}')
+		AND         is_deleted=0
+		LIMIT 1
+	</select>
+	
+	<select id="fetchAllScreensByTheatreId" parameterType="int" resultType="Screen">
+		SELECT 		screen_id id, 
+					screen_name screenName, 
+					theatre_id theatreId
+		FROM 		screen
+		WHERE       theatre_id = #{theatreId}
+		AND         is_deleted=0
+	</select>
+	
+	<resultMap type="MovieShow" id="MovieShowRMap">
+		<id property="id" column="id"/>
+		<result property="movieId" column="movieId"/>
+		<result property="screenId" column="screenId"/>
+		<result property="showTimingFrom" column="showTimingFrom"/>
+		<result property="showTimingTo" column="showTimingTo"/>
+		<result property="showStartDate" column="showStartDate"/>
+		<result property="showEndDate" column="showEndDate"/>
+		<result property="showDate" column="showDate"/>
+		<association property="movie" javaType="Movie">
+			<id property="id" column="mvId"/>
+			<result property="movieName" column="movieName"/>
+			<result property="releaseDate" column="releaseDate"/>
+		</association>
+		<association property="screen" javaType="Screen">
+			<id property="id" column="scrId"/>
+			<result property="screenName" column="screenName"/>
+			<result property="theatreId" column="theatreId"/>
+		</association>
+	</resultMap>
+	
+	<select id="fetchAllShowsByTheatreId" parameterType="int" resultMap="MovieShowRMap">
+		SELECT 	ms.movie_show_id id, 
+				ms.movie_id movieId, 
+				ms.screen_id screenId, 
+				ms.show_timing_from showTimingFrom, 
+				ms.show_timing_to showTimingTo, 
+				ms.show_start_date showStartDate, 
+				ms.show_end_date showEndDate, 
+				ms.show_date showDate,
+				scr.screen_id scrId, 
+				scr.screen_name screenName, 
+				scr.theatre_id theatreId, 
+				mv.movie_id mvId, 
+				mv.movie_name movieName, 
+				mv.release_date releaseDate
+		FROM 	movie_show ms
+		INNER JOIN movie mv 
+		ON 		mv.movie_id = ms.movie_id AND mv.is_deleted=0
+		INNER JOIN screen scr 
+		ON 		scr.screen_id = ms.screen_id AND scr.is_deleted=0
+		WHERE   scr.theatre_id = #{theatreId}
+		AND		ms.is_deleted=0  
+	</select>
+	
+	<update id="logicalDelete" parameterType="MovieShow">
+		UPDATE 	movie_show
+		SET 	is_deleted=2,
+				update_time=NOW()
+		WHERE 	movie_show_id = #{id}
+		AND     is_deleted=0
+	</update>
+	
+</mapper>
